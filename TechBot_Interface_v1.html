@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI HR • Voice Interview Ultra</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0b14; --panel:#0f1122; --glass:rgba(255,255,255,.08);
+    --line:rgba(255,255,255,.15); --accent:#7c5cff; --accent2:#22d3ee;
+    --txt:#e5e7eb;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%; margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif; color:var(--txt);}
+  body{
+    background: radial-gradient(1200px 600px at -10% -10%, #1a1548 0%, transparent 60%),
+                radial-gradient(1000px 500px at 110% 0%, #063d4f 0%, transparent 60%),
+                linear-gradient(160deg,#070912 0%, #0a0b14 60%);
+    overflow:hidden;
+  }
+  #fx{position:fixed; inset:0; z-index:-1;}
+  .wrap{display:grid; grid-template-columns:360px 1fr; gap:18px; padding:22px; height:100%;}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr;}}
+  .panel, .chat{background:linear-gradient(180deg, rgba(255,255,255,.06), transparent), var(--glass); border:1px solid var(--line); border-radius:18px; backdrop-filter: blur(10px); box-shadow: 0 24px 60px rgba(0,0,0,.35);}
+  .panel{padding:16px; display:flex; flex-direction:column; gap:14px;}
+  .header{display:flex; justify-content:space-between; align-items:center; gap:10px;}
+  .brand{font-weight:800; letter-spacing:.2px; display:flex; align-items:center; gap:10px;}
+  .badge{font-size:12px; padding:4px 8px; border-radius:999px; color:#0a0b14; background:linear-gradient(135deg, var(--accent), var(--accent2)); font-weight:800;}
+  .status{display:flex; align-items:center; gap:8px; font-size:12.5px; opacity:.9;}
+  .dot{width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 12px #ef4444aa;}
+  .connected .dot{ background:#22c55e; box-shadow:0 0 12px #22c55eaa;}
+  .card{border:1px solid var(--line); border-radius:14px; padding:14px; background:rgba(255,255,255,.04);}
+  .row{display:flex; gap:10px; align-items:center;}
+  .pill{flex:1; border:1px solid var(--line); border-radius:999px; padding:9px 12px; font-size:13.5px; background:rgba(255,255,255,.06); color:var(--txt);}
+  .btn{border:none; cursor:pointer; border-radius:12px; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#0a0b14; padding:10px 14px; transition:transform .06s ease, filter .25s;}
+  .btn:active{ transform: translateY(1px) scale(.98);}
+  .btn.ghost{background:rgba(255,255,255,.06); color:var(--txt); border:1px solid var(--line);}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+  .chip{padding:7px 10px; border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.06); font-size:12.5px; cursor:pointer;}
+  .chip:hover{ filter:brightness(1.15);}
+  .tog{display:flex; align-items:center; gap:8px; font-size:13px; opacity:.9;}
+  .tog input{ accent-color: var(--accent);}
+  .meter{margin-top:8px; width:100%; height:10px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.06); border:1px solid var(--line);}
+  .bar{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .4s;}
+  .chat{display:grid; grid-template-rows:auto 1fr auto; min-height:0;}
+  .chathead{display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line);}
+  .who{display:flex; align-items:center; gap:12px;}
+  .botface{width:46px; height:46px; border-radius:16px; border:1px solid var(--line); background: radial-gradient(circle at 30% 30%, #1b2440, #101426); position:relative; display:grid; place-items:center;}
+  .bars{position:absolute; bottom:6px; left:50%; transform:translateX(-50%); display:grid; grid-auto-flow:column; gap:3px;}
+  .bar1,.bar2,.bar3,.bar4{ width:3px; height:6px; background:#9aa5b1; border-radius:2px; opacity:.7;}
+  .speaking .bar1{animation: talk 0.3s infinite;} 
+  .speaking .bar2{animation: talk 0.35s infinite .05s;} 
+  .speaking .bar3{animation: talk 0.32s infinite .1s;} 
+  .speaking .bar4{animation: talk 0.37s infinite .02s;}
+  @keyframes talk{0%{height:6px} 50%{height:14px} 100%{height:6px}}
+  .msgs{padding:18px; overflow:auto; display:flex; flex-direction:column; gap:12px;}
+  .msg{display:flex; gap:10px; max-width:82%; animation:pop .12s ease-out both;}
+  .msg.user{align-self:flex-end; flex-direction:row-reverse;}
+  .avatar{width:36px; height:36px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.06); display:grid; place-items:center;}
+  .bubble{padding:12px 14px; border-radius:14px; line-height:1.4; font-size:14.5px; border:1px solid var(--line); box-shadow:0 20px 40px rgba(0,0,0,.25); white-space:pre-wrap;}
+  .bot .bubble{background:rgba(255,255,255,.06);}
+  .user .bubble{background:rgba(34,197,94,.22);}
+  @keyframes pop{from{transform:scale(.98); opacity:0} to{transform:scale(1); opacity:1}}
+  .typing{font-style:italic; opacity:.8;}
+  .console{border-top:1px solid var(--line); padding:10px; display:flex; align-items:center; gap:10px;}
+  .field{flex:1; display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.05);}
+  .iconbtn{width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:rgba(255,255,255,.06); display:grid; place-items:center; cursor:pointer;}
+  .listenpad{position:relative; border-radius:14px; overflow:hidden;}
+  #wave{width:120px; height:42px; display:block; opacity:.85;}
+  .listenpad::after{content:"Listening"; position:absolute; inset:auto 8px 6px auto; font-size:11px; opacity:.7;}
+  .listenpad.active{box-shadow:0 0 0 2px rgba(34,211,238,.4), 0 0 24px rgba(34,211,238,.25);}
+  .confetti{position:fixed; inset:0; pointer-events:none;}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="wrap">
+  <aside class="panel">
+    <div class="header">
+      <div class="brand">AI HR Interview <span class="badge">VOICE</span></div>
+      <div id="status" class="status"><span class="dot"></span> backend</div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <input id="skill" class="pill" placeholder="Primary skill (e.g., Python)" />
+        <button id="start" class="btn">Start 🚀</button>
+      </div>
+      <div class="chips" id="skillchips">
+        <div class="chip">Python</div><div class="chip">Java</div><div class="chip">JavaScript</div>
+        <div class="chip">SQL</div><div class="chip">Machine Learning</div>
+      </div>
+      <div class="row" style="margin-top:10px; justify-content:space-between">
+        <label class="tog"><input type="checkbox" id="tts" checked> 🔊 Speak questions</label>
+        <label class="tog"><input type="checkbox" id="autolisten" checked> 🎙️ Always listen</label>
+      </div>
+      <div class="meter"><div id="progress" class="bar"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div class="tog"><input type="checkbox" id="fxbg" checked> ✨ Background FX</div>
+        <div class="tog"><input type="checkbox" id="conf" checked> 🎉 Confetti on finish</div>
+      </div>
+      <div class="row" style="margin-top:8px; gap:8px">
+        <button id="stop" class="btn ghost">Stop</button>
+        <button id="clear" class="btn ghost">Clear</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="chat">
+    <div class="chathead">
+      <div class="who">
+        <div id="face" class="botface">
+          <div class="bars">
+            <div class="bar1"></div><div class="bar2"></div><div class="bar3"></div><div class="bar4"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-weight:800">HR Interview Bot</div>
+          <div style="opacity:.75; font-size:12.5px">One question at a time • Voice</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="msgs" class="msgs"></div>
+
+    <div class="console">
+      <div id="listenpad" class="field listenpad">
+        <canvas id="wave"></canvas>
+      </div>
+      <button id="tap" class="iconbtn" title="Tap to talk">🎙️</button>
+      <button id="send" class="btn">Send ➤</button>
+    </div>
+  </section>
+</div>
+
+<canvas id="confetti" class="confetti"></canvas>
+
+<script>
+/* =======================
+  Variables + DOM
+======================= */
+const API = 'http://127.0.0.1:8000';
+const statusEl = document.getElementById('status');
+const msgsEl = document.getElementById('msgs');
+const skillEl = document.getElementById('skill');
+const startBtn = document.getElementById('start');
+const stopBtn = document.getElementById('stop');
+const clearBtn = document.getElementById('clear');
+const ttsToggle = document.getElementById('tts');
+const autoListenToggle = document.getElementById('autolisten');
+const progressBar = document.getElementById('progress');
+const face = document.getElementById('face');
+const fxCanvas = document.getElementById('fx');
+const confettiCanvas = document.getElementById('confetti');
+const tapBtn = document.getElementById('tap');
+const sendBtn = document.getElementById('send');
+const listenPad = document.getElementById('listenpad');
+const wave = document.getElementById('wave');
+
+let recognition, micStream, analyser, waveCtx, raf;
+let speaking = false, typing=false;
+let lastUserText=""; asked=0; targetQuestions=8;
+
+/* =========================
+   Background FX
+========================= */
+const fx = fxCanvas.getContext('2d');
+let particles = Array.from({length:80},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*2+0.5,v:(Math.random()*0.6+0.2),a: Math.random()*360}));
+fxCanvas.width=innerWidth; fxCanvas.height=innerHeight;
+function drawFX(){
+  fx.clearRect(0,0,innerWidth,innerHeight);
+  if(!document.getElementById('fxbg').checked){ requestAnimationFrame(drawFX); return; }
+  fx.fillStyle='rgba(255,255,255,0.35)';
+  particles.forEach(p=>{
+    p.x += Math.cos(p.a)*p.v; p.y += Math.sin(p.a)*p.v; p.a+=0.01;
+    if(p.x<0||p.x>innerWidth)p.v*=-1;
+    if(p.y<0||p.y>innerHeight)p.v*=-1;
+    fx.beginPath(); fx.arc(p.x,p.y,p.r,0,Math.PI*2); fx.fill();
+  });
+  requestAnimationFrame(drawFX);
+}
+drawFX();
+addEventListener('resize',()=>{fxCanvas.width=innerWidth; fxCanvas.height=innerHeight});
+
+/* =========================
+   Chat helpers
+========================= */
+function addMsg(sender,text){
+  const line=document.createElement('div'); line.className='msg '+sender;
+  const av=document.createElement('div'); av.className='avatar'; av.textContent=sender==='bot'?'🤖':'🧑';
+  const b=document.createElement('div'); b.className='bubble';
+  line.appendChild(av); line.appendChild(b); msgsEl.appendChild(line); msgsEl.scrollTop=msgsEl.scrollHeight;
+  if(sender==='bot'){ typeText(b,text); } else { b.textContent=text; }
+}
+function typeText(el,text){ typing=true; let i=0; const speed=10+Math.random()*8;
+  const timer=setInterval(()=>{ el.textContent=text.slice(0,++i); msgsEl.scrollTop=msgsEl.scrollHeight; if(i>=text.length){ clearInterval(timer); typing=false;}}, speed);
+}
+function speak(text){
+  if(!ttsToggle.checked || !('speechSynthesis' in window)){ afterSpeak(); return; }
+  const u = new SpeechSynthesisUtterance(text); u.rate=1.02; u.pitch=1; speaking=true; face.classList.add('speaking');
+  u.onend=()=>{ speaking=false; face.classList.remove('speaking'); afterSpeak(); };
+  window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
+}
+function afterSpeak(){ if(autoListenToggle.checked) startListening(); }
+
+/* =========================
+   Waveform
+========================= */
+waveCtx = wave.getContext('2d'); waveCtx.fillStyle='#ffffff';
+function drawWave(){
+  waveCtx.clearRect(0,0,wave.width,wave.height);
+  if(analyser){
+    const data = new Uint8Array(analyser.fftSize);
+    analyser.getByteTimeDomainData(data);
+    waveCtx.beginPath();
+    for(let x=0;x<wave.width;x++){ const i=Math.floor(x/wave.width*data.length); const y=(data[i]/255)*wave.height; if(x===0) waveCtx.moveTo(x,y); else waveCtx.lineTo(x,y);}
+    waveCtx.strokeStyle='#22d3ee'; waveCtx.lineWidth=2; waveCtx.stroke();
+  }
+  raf=requestAnimationFrame(drawWave);
+}
+wave.width=120; wave.height=42; drawWave();
+
+/* =========================
+   Mic + SpeechRecognition
+========================= */
+async function initMic(){
+  try{
+    micStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    analyser=ctx.createAnalyser(); analyser.fftSize=1024;
+    const src=ctx.createMediaStreamSource(micStream); src.connect(analyser);
+    drawWave();
+
+    if('webkitSpeechRecognition' in window){
+      recognition=new webkitSpeechRecognition();
+      recognition.lang='en-US'; recognition.interimResults=true; recognition.continuous=true;
+      recognition.onstart=()=>{ listenPad.classList.add('active'); };
+      recognition.onend=()=>{ listenPad.classList.remove('active'); if(autoListenToggle.checked && !speaking){ try{ recognition.start(); }catch(e){} } };
+      recognition.onresult=async (e)=>{
+        let finalText=''; let interim='';
+        for(let i=e.resultIndex;i<e.results.length;i++){ const t=e.results[i][0].transcript; if(e.results[i].isFinal) finalText+=t; else interim=t;}
+        if(finalText.trim()){ lastUserText=finalText.trim(); addMsg('user',lastUserText); await sendAnswer(lastUserText);}
+      }
+    } else { addMsg('bot','⚠️ Your browser does not support Speech Recognition. Use Chrome desktop.'); }
+  } catch(e){ addMsg('bot','⚠️ Microphone access denied.'); console.warn(e);}
+}
+
+function startListening(){ try{ recognition && recognition.start(); }catch(e){} }
+function stopListening(){ try{ recognition && recognition.stop(); }catch(e){} }
+
+/* =========================
+   Backend
+========================= */
+async function startInterview(){
+  const skill=(skillEl.value||'').trim(); if(!skill){ alert('Enter skill'); return; }
+  msgsEl.innerHTML=''; addMsg('bot','Initializing interview…'); asked=0; progressBar.style.width='0%';
+  try{
+    const res=await fetch(`${API}/start`,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({skill})});
+    const data=await res.json(); addMsg('bot', `Welcome! Starting your ${skill} interview. 👋`); addMsg('bot', data.reply); speak(data.reply);
+    asked+=1; progressBar.style.width=`${Math.min(100,(asked/targetQuestions)*100)}%`;
+  }catch(e){ addMsg('bot','⚠️ Backend not reachable.'); console.warn(e);}
+}
+
+async function sendAnswer(text){
+  stopListening();
+  try{
+    const res=await fetch(`${API}/chat`,{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({answer:text})});
+    const data=await res.json(); addMsg('bot',data.reply); speak(data.reply); asked+=1; progressBar.style.width=`${Math.min(100,(asked/targetQuestions)*100)}%`;
+  }catch(e){ addMsg('bot','⚠️ Network error.'); if(autoListenToggle.checked) startListening();}
+}
+
+/* =========================
+   Confetti
+========================= */
+const cx = confettiCanvas.getContext('2d'); let bits=[];
+function fireConfetti(){
+  const w = confettiCanvas.width = innerWidth; const h = confettiCanvas.height=innerHeight;
+  bits = Array.from({length:150},()=>({x:Math.random()*w, y:-20-Math.random()*h*0.4, s:Math.random()*6+3, c:`hsl(${Math.random()*360},95%,60%)`, vy:Math.random()*3+2, vx:(Math.random()-0.5)*1.5, rot:Math.random()*360, vr:(Math.random()-0.5)*8}));
+  (function tick(){ cx.clearRect(0,0,w,h); bits.forEach(b=>{b.vy+=0.04; b.y+=b.vy; b.x+=b.vx; b.rot+=b.vr; cx.save(); cx.translate(b.x,b.y); cx.rotate(b.rot*Math.PI/180); cx.fillStyle=b.c; cx.fillRect(-b.s/2,-b.s/2,b.s,b.s); cx.restore();}); if(bits.some(b=>b.y<h+40)) requestAnimationFrame(tick); }());
+}
+
+/* =========================
+   Events
+========================= */
+startBtn.addEventListener('click',async()=>{ await initMic(); startInterview();});
+stopBtn.addEventListener('click',()=>{ stopListening(); });
+clearBtn.addEventListener('click',()=>{ msgsEl.innerHTML=''; asked=0; progressBar.style.width='0%';});
+tapBtn.addEventListener('mousedown',()=>recognition && recognition.start());
+tapBtn.addEventListener('mouseup',()=>recognition && recognition.stop());
+sendBtn.addEventListener('click',()=>{ if(lastUserText) sendAnswer(lastUserText);});
+</script>
+</body>
+</html>
